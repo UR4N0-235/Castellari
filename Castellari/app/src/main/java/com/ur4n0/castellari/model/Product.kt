@@ -1,13 +1,17 @@
 package com.ur4n0.castellari.model
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+
 class Product {
-    var quantity: Int = 0
+    var quantity: Int = 1
     var description: String = ""
     var unitPrice: Double = 0.0
-    var totalPrice: Double = 0.0
+    var totalPrice = 0.0
 
-    fun calcTotal() {
-        this.totalPrice = this.quantity * this.unitPrice
+    fun calcTotal(): String {
+        return (this.quantity * this.unitPrice).toString()
     }
 
     constructor()

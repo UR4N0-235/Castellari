@@ -94,16 +94,29 @@ fun ProductRow(product: Product) {
         Column(
             modifier = Modifier
                 .weight(10f)
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val text = remember { mutableStateOf(product.quantity.toString()) }
             TextField(
                 value = text.value,
-                onValueChange = { newText ->
-                    run {
-                        text.value = newText
-                        product.calcTotal()
+                singleLine = true,
+                onValueChange = {
+                    try {
+                        if(it == "0" || it == ""){
+                            text.value = "1"
+                            product.quantity = 1
+                        }else if( it.toInt() > 9){
+                            text.value = "9"
+                            product.quantity = 9
+                        }
+                        else{
+                            product.quantity = it.toInt()
+                            text.value = it
+                        }
+                    } catch (ex: NumberFormatException) {
+                        text.value = text.value
                     }
                 },
             )
@@ -131,10 +144,17 @@ fun ProductRow(product: Product) {
             val text = remember { mutableStateOf(product.unitPrice.toString()) }
             TextField(
                 value = text.value,
-                onValueChange = { newText ->
-                    run {
-                        text.value = newText
-                        product.calcTotal()
+                onValueChange = {
+                    try {
+                        if(it == "0" || it == ""){
+                            text.value = "0.0"
+                            product.unitPrice = 0.0
+                        }else{
+                            product.unitPrice = it.toDouble()
+                            text.value = it
+                        }
+                    } catch (ex: NumberFormatException) {
+                        text.value = text.value
                     }
                 },
             )
@@ -145,14 +165,9 @@ fun ProductRow(product: Product) {
                 .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val text = remember { mutableStateOf(product.totalPrice.toString()) }
-            TextField(
-                value = text.value,
-                onValueChange = { newText ->
-                    text.value = newText
-                },
-                readOnly = true
-            )
+            Column{
+                Text((product.quantity * product.unitPrice).toString())
+            }
         }
         Column(
             modifier = Modifier
