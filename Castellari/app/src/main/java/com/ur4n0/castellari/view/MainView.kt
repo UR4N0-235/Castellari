@@ -8,14 +8,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ur4n0.castellari.viewmodel.InputItem
 
 import java.util.Calendar
 
@@ -36,21 +36,10 @@ fun MainContent() {
         Column(
             Modifier
                 .fillMaxWidth()
-                .weight(4f)) {
+                .weight(4f)
+        ) {
             Buttons()
         }
-    }
-}
-
-@Composable
-fun Input(labelText: String, defaultText: String) {
-    Row {
-        val text = remember { mutableStateOf(defaultText) }
-        TextField(value = text.value, onValueChange = { newText ->
-            text.value = newText
-        }, label = {
-            Text(text = labelText)
-        })
     }
 }
 
@@ -60,20 +49,50 @@ fun MainViewHeader() {
         modifier = Modifier
             .fillMaxWidth()
             .offset(0.dp, 4.dp)
+            .padding(2.dp, 0.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text("Data: " + getTodayDate())
-            Input("Nome do cliente", "")
-            Input("Veiculo", "")
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(2.dp, 0.dp)
+        ) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally),
+                text = "Data: " + getTodayDate()
+            )
+            InputItem(
+                "Nome do cliente",
+                Modifier
+                    .fillMaxWidth()
+            )
+            InputItem(
+                "Veiculo",
+                Modifier
+                    .fillMaxWidth()
+            )
         }
         Column(
             modifier = Modifier
                 .weight(1f)
-                .offset(4.dp)
+                .padding(2.dp, 0.dp)
         ) {
-            Text("Vencimento em 10 dias!")
-            Input("Telefone", "")
-            Input("Placa", "")
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally),
+                text = "Vence em 10 dias!"
+            )
+            InputItem(
+                "Telefone",
+                Modifier
+                    .fillMaxWidth()
+            )
+            InputItem(
+                "Placa",
+                Modifier
+                    .fillMaxWidth()
+            )
         }
     }
 }
