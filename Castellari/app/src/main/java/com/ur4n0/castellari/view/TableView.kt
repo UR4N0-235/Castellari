@@ -1,19 +1,19 @@
 package com.ur4n0.castellari.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import com.ur4n0.castellari.model.Product
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 
 
@@ -93,7 +93,7 @@ fun ProductRow(product: Product) {
     ) {
         Column(
             modifier = Modifier
-                .weight(10f)
+                .weight(15f)
                 .fillMaxHeight()
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -104,14 +104,13 @@ fun ProductRow(product: Product) {
                 singleLine = true,
                 onValueChange = {
                     try {
-                        if(it == "0" || it == ""){
-                            text.value = "1"
-                            product.quantity = 1
-                        }else if( it.toInt() > 9){
+                        if (it == "0" || it == "") {
+                            text.value = ""
+                            product.quantity = 0
+                        } else if (it.toInt() > 9) {
                             text.value = "9"
                             product.quantity = 9
-                        }
-                        else{
+                        } else {
                             product.quantity = it.toInt()
                             text.value = it
                         }
@@ -119,6 +118,9 @@ fun ProductRow(product: Product) {
                         text.value = text.value
                     }
                 },
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.Transparent
+                )
             )
         }
         Column(
@@ -133,6 +135,9 @@ fun ProductRow(product: Product) {
                 onValueChange = { newText ->
                     text.value = newText
                 },
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.Transparent
+                )
             )
         }
         Column(
@@ -146,10 +151,10 @@ fun ProductRow(product: Product) {
                 value = text.value,
                 onValueChange = {
                     try {
-                        if(it == "0" || it == ""){
+                        if (it == "0" || it == "") {
                             text.value = "0.0"
                             product.unitPrice = 0.0
-                        }else{
+                        } else {
                             product.unitPrice = it.toDouble()
                             text.value = it
                         }
@@ -157,6 +162,9 @@ fun ProductRow(product: Product) {
                         text.value = text.value
                     }
                 },
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.Transparent
+                )
             )
         }
         Column(
@@ -165,22 +173,33 @@ fun ProductRow(product: Product) {
                 .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column{
-                Text((product.quantity * product.unitPrice).toString())
+            Row {
+                Text("R$ " + (product.quantity * product.unitPrice).toString())
+                Button(
+                    onClick = {
+                        removeProduct(product)
+                    },
+                    colors = ButtonDefaults
+                        .buttonColors(
+                            backgroundColor = Color
+                                .Transparent,
+                            contentColor = MaterialTheme
+                                .colors
+                                .primary
+                        )
+                ) {
+                    Text("X")
+                }
             }
         }
-        Column(
-            modifier = Modifier
-                .weight(9f)
-                .fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(onClick = {
-                removeProduct(product)
-            }) {
-                Text("X")
-            }
-        }
+//        Column(
+//            modifier = Modifier
+//                .weight(9f)
+//                .fillMaxHeight(),
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//
+//        }
     }
 }
 

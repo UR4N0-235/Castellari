@@ -7,6 +7,8 @@ import com.ur4n0.castellari.model.Product
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -63,12 +65,14 @@ fun MainViewHeader() {
                 text = "Data: " + getTodayDate()
             )
             InputItem(
+                "Cliente",
                 "Nome do cliente",
                 Modifier
                     .fillMaxWidth()
             )
             InputItem(
                 "Veiculo",
+                "Tipo do veiculo",
                 Modifier
                     .fillMaxWidth()
             )
@@ -85,11 +89,13 @@ fun MainViewHeader() {
             )
             InputItem(
                 "Telefone",
+                "Telefone do cliente",
                 Modifier
                     .fillMaxWidth()
             )
             InputItem(
                 "Placa",
+                "Placa do carro",
                 Modifier
                     .fillMaxWidth()
             )
@@ -113,7 +119,17 @@ fun Buttons() {
     ) {
         Button(onClick = {
             addProduct(Product())
-        }) {
+        },
+            colors = ButtonDefaults
+                .buttonColors(
+                    backgroundColor = MaterialTheme
+                        .colors
+                        .primary,
+                    contentColor = MaterialTheme
+                        .colors
+                        .primaryVariant
+                )
+        ) {
             Text("+")
         }
 
@@ -125,14 +141,34 @@ fun Buttons() {
         Column {
             Button(onClick = {
 
-            }) {
+            },
+                colors = ButtonDefaults
+                    .buttonColors(
+                        backgroundColor = MaterialTheme
+                            .colors
+                            .primaryVariant,
+                        contentColor = MaterialTheme
+                            .colors
+                            .primary
+                    )
+            ) {
                 Text("Salvar")
             }
         }
         Column {
             Button(onClick = {
 
-            }) {
+            },
+                colors = ButtonDefaults
+                    .buttonColors(
+                        backgroundColor = MaterialTheme
+                            .colors
+                            .primaryVariant,
+                        contentColor = MaterialTheme
+                            .colors
+                            .primary
+                    )
+            ) {
                 Text("Compartilhar")
             }
         }

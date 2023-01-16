@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 
 @Composable
-fun InputItem(labelText: String, modifier: Modifier) {
+fun InputItem(labelText: String, placeholder: String, modifier: Modifier) {
     Row {
         val text = remember { mutableStateOf("") }
 
@@ -17,8 +17,12 @@ fun InputItem(labelText: String, modifier: Modifier) {
             value = text.value,
             onValueChange = {
                 text.value = it
-            }, label = {
-               Text(text = labelText)
+            },
+            label = {
+                Text(text = labelText)
+            },
+            placeholder = {
+                          Text(text = placeholder)
             },
             modifier = modifier
         )
