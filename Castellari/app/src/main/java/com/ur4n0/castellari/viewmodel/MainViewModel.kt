@@ -1,31 +1,34 @@
 package com.ur4n0.castellari.viewmodel
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import com.ur4n0.castellari.model.Product
 
-@Composable
-fun InputItem(labelText: String, placeholder: String, modifier: Modifier) {
-    Row {
-        val text = remember { mutableStateOf("") }
+class MainViewModel: ViewModel(){
+    private val _listOfElements: MutableState<MutableList<Product>> = mutableStateOf(mutableListOf())
+    val listOfElements: State<List<Product>> = _listOfElements
 
-        OutlinedTextField(
-            value = text.value,
-            onValueChange = {
-                text.value = it
-            },
-            label = {
-                Text(text = labelText)
-            },
-            placeholder = {
-                          Text(text = placeholder)
-            },
-            modifier = modifier
-        )
+    fun addProduct(product: Product){
+        _listOfElements.value.add(product)
+//        println("new products is :")
+//        _listOfElements.value.forEach(){
+//            println("id: " + it.id)
+//            println("quantity: " + it.quantity)
+//            println("description: " + it.description)
+//            println("unit price: " + it.unitPrice)
+//        }
+    }
 
+    fun removeProduct(product: Product) {
+        _listOfElements.value.removeAll(){ it == product }
+    }
+
+    fun newId():Int {
+        if(_listOfElements.value.isEmpty()){
+            return 1
+        }
+        return _listOfElements.value.last().id + 1
     }
 }

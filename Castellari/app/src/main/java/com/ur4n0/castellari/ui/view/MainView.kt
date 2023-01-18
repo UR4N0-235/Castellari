@@ -1,23 +1,23 @@
 package com.ur4n0.castellari.ui.components
 
+import android.service.notification.Condition.newId
 import com.ur4n0.castellari.ui.theme.CastellariTheme
 import com.ur4n0.castellari.R
 import com.ur4n0.castellari.model.Product
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ur4n0.castellari.viewmodel.InputItem
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ur4n0.castellari.viewmodel.MainViewModel
 
 import java.util.Calendar
 
@@ -50,8 +50,7 @@ fun MainViewHeader() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .offset(0.dp, 4.dp)
-            .padding(2.dp, 0.dp),
+            .padding(2.dp, 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         Column(
@@ -95,7 +94,7 @@ fun MainViewHeader() {
             )
             InputItem(
                 "Placa",
-                "Placa do carro",
+                "Placa do veiculo",
                 Modifier
                     .fillMaxWidth()
             )
@@ -112,13 +111,14 @@ fun Logo() {
 }
 
 @Composable
-fun Buttons() {
+fun Buttons(mainViewModel: MainViewModel = viewModel()) {
     Row(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End
     ) {
         Button(onClick = {
-            addProduct(Product())
+            val latestId: Int = mainViewModel.newId()
+            mainViewModel.addProduct(Product(latestId,1,"",0.0))
         },
             colors = ButtonDefaults
                 .buttonColors(
@@ -172,6 +172,28 @@ fun Buttons() {
                 Text("Compartilhar")
             }
         }
+    }
+}
+
+@Composable
+fun InputItem(labelText: String, placeholder: String, modifier: Modifier) {
+    Row {
+        val text = remember { mutableStateOf("") }
+
+        OutlinedTextField(
+            value = text.value,
+            onValueChange = {
+                text.value = it
+            },
+            label = {
+                Text(text = labelText)
+            },
+            placeholder = {
+                Text(text = placeholder)
+            },
+            modifier = modifier
+        )
+
     }
 }
 

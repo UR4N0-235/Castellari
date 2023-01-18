@@ -1,63 +1,40 @@
 package com.ur4n0.castellari.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import com.ur4n0.castellari.model.Product
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-
-
-private val elements = mutableStateListOf(Product())
-val products: List<Product> = elements
-
-fun addProduct(product: Product) {
-    elements.add(product)
-}
-
-fun removeProduct(product: Product) {
-    elements.remove(product)
-}
-
-//@Composable
-//fun TableView() {
-//    TableHeader()
-//    TableBody()
-//}
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ur4n0.castellari.viewmodel.MainViewModel
 
 @Composable
 fun TableHeader() {
     Row(modifier = Modifier.fillMaxWidth()) {
         Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Qtd.")
         }
         Column(
-            modifier = Modifier.weight(3f),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.weight(3f), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Descricao")
         }
         Column(
-            modifier = Modifier.weight(2f),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.weight(2f), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Valor unit")
         }
         Column(
-            modifier = Modifier.weight(2f),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.weight(2f), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Total")
         }
@@ -65,27 +42,27 @@ fun TableHeader() {
 }
 
 @Composable
-fun TableContent() {
+fun TableContent(mainViewModel: MainViewModel = viewModel()) {
     Row(
         Modifier
             .verticalScroll(rememberScrollState())
             .fillMaxWidth()
     ) {
-        ProductList(products)
-    }
-}
-
-@Composable
-fun ProductList(products: List<Product>) {
-    Column {
-        products.forEach { product ->
-            ProductRow(product)
+        val products: List<Product> by mainViewModel.listOfElements
+        Column {
+            products.forEach {
+                println("product id " + it.id)
+                ProductRow(it)
+            }
         }
     }
 }
 
 @Composable
-fun ProductRow(product: Product) {
+fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
+    println("product " + product.id)
+    println("quantity " + product.quantity)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -98,27 +75,38 @@ fun ProductRow(product: Product) {
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val text = remember { mutableStateOf(product.quantity.toString()) }
+            var text = remember { product.quantity.toString() }
+            println("recomposed " + product.quantity)
+            println("new text recomposed " + text)
             TextField(
-                value = text.value,
+                value = text,
                 singleLine = true,
                 onValueChange = {
                     try {
                         if (it == "0" || it == "") {
-                            text.value = ""
+                            println("user typed 0 or \"\"")
                             product.quantity = 0
-                        } else if (it.toInt() > 9) {
-                            text.value = "9"
-                            product.quantity = 9
+                            text = ""
+                        } else if (it.length > 1) {
+                            println(
+                                "user typed one number with length > 1: changed number to " + it.drop(
+                                    1
+                                )
+                            )
+                            product.quantity = it.drop(1).toInt()
+                            text = it.drop(1)
+                            println("Quantity now is " + product.quantity)
+                            println("Text is $text")
                         } else {
+                            println("user typed $it")
                             product.quantity = it.toInt()
-                            text.value = it
+                            text = it
                         }
                     } catch (ex: NumberFormatException) {
-                        text.value = text.value
+                        println("quantity NaN Exception")
+                        text = text
                     }
-                },
-                colors = TextFieldDefaults.textFieldColors(
+                }, colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
                 )
             )
@@ -131,11 +119,9 @@ fun ProductRow(product: Product) {
         ) {
             val text = remember { mutableStateOf(product.description) }
             TextField(
-                value = text.value,
-                onValueChange = { newText ->
+                value = text.value, onValueChange = { newText ->
                     text.value = newText
-                },
-                colors = TextFieldDefaults.textFieldColors(
+                }, colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
                 )
             )
@@ -148,8 +134,7 @@ fun ProductRow(product: Product) {
         ) {
             val text = remember { mutableStateOf(product.unitPrice.toString()) }
             TextField(
-                value = text.value,
-                onValueChange = {
+                value = text.value, onValueChange = {
                     try {
                         if (it == "0" || it == "") {
                             text.value = "0.0"
@@ -161,8 +146,7 @@ fun ProductRow(product: Product) {
                     } catch (ex: NumberFormatException) {
                         text.value = text.value
                     }
-                },
-                colors = TextFieldDefaults.textFieldColors(
+                }, colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
                 )
             )
@@ -174,32 +158,26 @@ fun ProductRow(product: Product) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row {
-                Text("R$ " + (product.quantity * product.unitPrice).toString())
+                Text(
+                    "R$ " + (product.quantity * product.unitPrice).toString(),
+                    Modifier.fillMaxHeight()
+                )
+                var text = remember { mutableStateOf("") }
+                Text(product.id.toString())
                 Button(
                     onClick = {
-                        removeProduct(product)
-                    },
-                    colors = ButtonDefaults
-                        .buttonColors(
-                            backgroundColor = Color
-                                .Transparent,
-                            contentColor = MaterialTheme
-                                .colors
-                                .primary
-                        )
+                        //text.value = elements.indexOf(product).toString()
+                        //elements.removeAt(elements.indexOf(product))
+                        mainViewModel.removeProduct(product)
+                    }, colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Transparent,
+                        contentColor = MaterialTheme.colors.primary
+                    )
                 ) {
                     Text("X")
                 }
             }
         }
-//        Column(
-//            modifier = Modifier
-//                .weight(9f)
-//                .fillMaxHeight(),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//
-//        }
     }
 }
 
