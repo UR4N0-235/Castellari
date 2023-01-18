@@ -15,4 +15,4 @@ Sorry but today this app still in development, so I can't let one APK here. If y
 The step by step about how to make this shit work.
 First, you need to install [android studio LTS](https://developer.android.com/studio), after that, [clone this repository](https://github.com/UR4N0-235/Castellari/archive/refs/heads/master.zip), unzip that, and finally click to open with an android studio project. Install an [android emulator](https://developer.android.com/studio/run/emulator) in android studio, or just [connect your smartphone](https://developer.android.com/studio/run/device) to mode Debug USB or Wi-Fi debugger on, after that, the android studio will recognize and can make a built app for you.
 
-In some futer I will make an more friendly tutorial, but today this is all I can do, sorry for that :/
+In some future I will make a more friendly tutorial, but today this is all I can do, sorry for that :/
