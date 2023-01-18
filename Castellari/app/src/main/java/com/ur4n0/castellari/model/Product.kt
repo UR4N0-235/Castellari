@@ -6,20 +6,3 @@ data class Product(
     var description: String,
     var unitPrice: Double
 )
-
-//val elements = mutableStateListOf<Product>()
-//
-//fun addProduct(product: Product) {
-//    elements.add(product)
-//}
-//
-//fun removeProduct(product: Product) {
-//    elements.removeAll{ it == product }
-//}
-//
-//fun newId():Int {
-//    if(elements.isEmpty()){
-//        return 1
-//    }
-//    return elements.last().id + 1
-//}

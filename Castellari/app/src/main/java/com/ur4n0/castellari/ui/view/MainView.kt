@@ -1,9 +1,4 @@
-package com.ur4n0.castellari.ui.components
-
-import android.service.notification.Condition.newId
-import com.ur4n0.castellari.ui.theme.CastellariTheme
-import com.ur4n0.castellari.R
-import com.ur4n0.castellari.model.Product
+package com.ur4n0.castellari.ui.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -17,9 +12,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ur4n0.castellari.R
+import com.ur4n0.castellari.model.Product
+import com.ur4n0.castellari.ui.theme.CastellariTheme
 import com.ur4n0.castellari.viewmodel.MainViewModel
-
-import java.util.Calendar
+import java.util.*
 
 @Composable
 fun MainContent() {

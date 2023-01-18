@@ -1,7 +1,6 @@
 package com.ur4n0.castellari
 
 import com.ur4n0.castellari.ui.theme.CastellariTheme
-import com.ur4n0.castellari.ui.components.MainContent
 
 import android.os.Bundle
 
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
+import com.ur4n0.castellari.ui.view.MainContent
 
 
 class MainActivity : ComponentActivity() {

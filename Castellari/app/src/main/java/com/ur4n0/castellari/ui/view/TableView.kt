@@ -1,7 +1,7 @@
-package com.ur4n0.castellari.ui.components
+package com.ur4n0.castellari.ui.view
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import com.ur4n0.castellari.model.Product
 
 import androidx.compose.foundation.rememberScrollState
@@ -48,20 +48,19 @@ fun TableContent(mainViewModel: MainViewModel = viewModel()) {
             .verticalScroll(rememberScrollState())
             .fillMaxWidth()
     ) {
-        val products: List<Product> by mainViewModel.listOfElements
+        val products = mainViewModel.listOfElements
+
         Column {
             products.forEach {
-                println("product id " + it.id)
                 ProductRow(it)
             }
         }
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
-    println("product " + product.id)
-    println("quantity " + product.quantity)
 
     Row(
         modifier = Modifier
@@ -75,36 +74,27 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            var text = remember { product.quantity.toString() }
-            println("recomposed " + product.quantity)
-            println("new text recomposed " + text)
+            val text = mutableStateOf(product.quantity.toString())
+//            println("recomposed " + product.quantity)
+//            println("new text recomposed " + text.value)
             TextField(
-                value = text,
+                value = text.value,
                 singleLine = true,
                 onValueChange = {
                     try {
                         if (it == "0" || it == "") {
-                            println("user typed 0 or \"\"")
                             product.quantity = 0
-                            text = ""
+                            text.value = ""
                         } else if (it.length > 1) {
-                            println(
-                                "user typed one number with length > 1: changed number to " + it.drop(
-                                    1
-                                )
-                            )
                             product.quantity = it.drop(1).toInt()
-                            text = it.drop(1)
-                            println("Quantity now is " + product.quantity)
-                            println("Text is $text")
+                            text.value = it.drop(1)
                         } else {
-                            println("user typed $it")
                             product.quantity = it.toInt()
-                            text = it
+                            text.value = it
                         }
                     } catch (ex: NumberFormatException) {
                         println("quantity NaN Exception")
-                        text = text
+                        text.value = product.quantity.toString()
                     }
                 }, colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
@@ -117,10 +107,12 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                 .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val text = remember { mutableStateOf(product.description) }
+            val text = mutableStateOf(product.description)
             TextField(
-                value = text.value, onValueChange = { newText ->
-                    text.value = newText
+                value = text.value,
+                onValueChange = {
+                    product.description = it
+                    text.value = it
                 }, colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
                 )
@@ -132,24 +124,29 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                 .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val text = remember { mutableStateOf(product.unitPrice.toString()) }
-            TextField(
-                value = text.value, onValueChange = {
-                    try {
-                        if (it == "0" || it == "") {
-                            text.value = "0.0"
-                            product.unitPrice = 0.0
-                        } else {
-                            product.unitPrice = it.toDouble()
-                            text.value = it
+            Row{
+                Text("R$ ")
+                val text = mutableStateOf(product.unitPrice.toString())
+                TextField(
+                    value = text.value,
+                    onValueChange = {
+                        try {
+                            if (it == "0" || it == "") {
+                                product.unitPrice = 0.0
+                                text.value = ""
+                            } else {
+                                product.unitPrice = it.toDouble()
+                                text.value = it
+                            }
+                        } catch (ex: NumberFormatException) {
+                            println("unitPrice NaN Exception")
+                            text.value = product.unitPrice.toString()
                         }
-                    } catch (ex: NumberFormatException) {
-                        text.value = text.value
-                    }
-                }, colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = Color.Transparent
+                    }, colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = Color.Transparent
+                    )
                 )
-            )
+            }
         }
         Column(
             modifier = Modifier
@@ -162,12 +159,8 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                     "R$ " + (product.quantity * product.unitPrice).toString(),
                     Modifier.fillMaxHeight()
                 )
-                var text = remember { mutableStateOf("") }
-                Text(product.id.toString())
                 Button(
                     onClick = {
-                        //text.value = elements.indexOf(product).toString()
-                        //elements.removeAt(elements.indexOf(product))
                         mainViewModel.removeProduct(product)
                     }, colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.Transparent,
