@@ -8,8 +8,9 @@ class MainViewModel: ViewModel(){
     private val _listOfElements: MutableList<Product> = mutableStateListOf()
     val listOfElements = _listOfElements
 
-    fun addProduct(product: Product){
-        _listOfElements.add(product)
+    fun addEmptyProduct(){
+        val latestId: Int = newId()
+        _listOfElements.add(Product(latestId, 1, "", 0.0))
         println("product list size: " + _listOfElements.size)
     }
 

@@ -45,7 +45,6 @@ fun TableHeader() {
 fun TableContent(mainViewModel: MainViewModel = viewModel()) {
     Row(
         Modifier
-            .verticalScroll(rememberScrollState())
             .fillMaxWidth()
     ) {
         val products = mainViewModel.listOfElements
