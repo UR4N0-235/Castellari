@@ -10,8 +10,13 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ur4n0.castellari.viewmodel.MainViewModel
 
@@ -60,25 +65,26 @@ fun TableContent(mainViewModel: MainViewModel = viewModel()) {
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
+    val fontSize: TextUnit = 3.em
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
+            .height(80.dp)
     ) {
         Column(
             modifier = Modifier
                 .weight(15f)
-                .fillMaxHeight()
-                .fillMaxWidth(),
+                .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val text = mutableStateOf(product.quantity.toString())
-//            println("recomposed " + product.quantity)
-//            println("new text recomposed " + text.value)
             TextField(
                 value = text.value,
                 singleLine = true,
+                modifier = Modifier
+                    .focusRequester(FocusRequester())
+                    .fillMaxHeight().padding(0.dp),
                 onValueChange = {
                     try {
                         if (it == "0" || it == "") {
@@ -95,9 +101,13 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                         println("quantity NaN Exception")
                         text.value = product.quantity.toString()
                     }
-                }, colors = TextFieldDefaults.textFieldColors(
+                },
+                colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
-                )
+                ),
+                textStyle = LocalTextStyle.current.copy(
+                    fontSize = fontSize
+                ),
             )
         }
         Column(
@@ -109,6 +119,12 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
             val text = mutableStateOf(product.description)
             TextField(
                 value = text.value,
+                modifier = Modifier
+                    .focusRequester(FocusRequester())
+                    .fillMaxHeight().padding(0.dp),
+                textStyle = LocalTextStyle.current.copy(
+                    fontSize = fontSize
+                ),
                 onValueChange = {
                     product.description = it
                     text.value = it
@@ -124,10 +140,13 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row{
-                Text("R$ ")
                 val text = mutableStateOf(product.unitPrice.toString())
                 TextField(
                     value = text.value,
+                    modifier = Modifier
+                        .focusRequester(FocusRequester())
+                        .fillMaxHeight().padding(10.dp),
+
                     onValueChange = {
                         try {
                             if (it == "0" || it == "") {
@@ -143,7 +162,10 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                         }
                     }, colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = Color.Transparent
-                    )
+                    ),
+                    textStyle = LocalTextStyle.current.copy(
+                        fontSize = fontSize
+                    ),
                 )
             }
         }
@@ -156,7 +178,8 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
             Row {
                 Text(
                     "R$ " + (product.quantity * product.unitPrice).toString(),
-                    Modifier.fillMaxHeight()
+                    Modifier.fillMaxHeight().padding(0.dp),
+                    fontSize = fontSize
                 )
                 Button(
                     onClick = {
@@ -164,13 +187,18 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                     }, colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.Transparent,
                         contentColor = MaterialTheme.colors.primary
-                    )
+                    ),
+                    modifier = Modifier
+                        .padding(0.dp, 0.dp)
+                        .size(0.dp),
                 ) {
                     Text("X")
                 }
             }
         }
     }
+
+
 }
 
 @Preview(showSystemUi = true)

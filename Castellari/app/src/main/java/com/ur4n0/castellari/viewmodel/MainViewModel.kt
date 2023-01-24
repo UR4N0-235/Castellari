@@ -1,5 +1,6 @@
 package com.ur4n0.castellari.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import com.ur4n0.castellari.model.Product
@@ -9,6 +10,8 @@ class MainViewModel: ViewModel(){
     var clientTelephone by mutableStateOf("")
     var clientVehicle by mutableStateOf("")
     var clientLicensePlate by mutableStateOf("")
+
+    var configDialogStatus by mutableStateOf(false)
 
     private val _listOfElements: MutableList<Product> = mutableStateListOf()
     val listOfElements = _listOfElements
@@ -32,11 +35,18 @@ class MainViewModel: ViewModel(){
     fun addEmptyProduct(){
         val latestId: Int = newId()
         _listOfElements.add(Product(latestId, 1, "", 0.0))
-        println("product list size: " + _listOfElements.size)
+        Log.d("product.status: ", "added new product")
+        Log.d("product.size: ", "size changed to " + _listOfElements.size)
     }
 
     fun removeProduct(product: Product) {
         _listOfElements.removeAll{ it == product }
+        Log.d("product.status: ", "removed product")
+        Log.d("product.removed.info: ", product.id.toString())
+        Log.d("product.removed.info: ", product.quantity.toString())
+        Log.d("product.removed.info: ", product.description)
+        Log.d("product.removed.info: ", product.unitPrice.toString())
+        Log.d("product.size: ", "size changed to " + _listOfElements.size)
     }
 
     fun newId():Int {

@@ -1,7 +1,13 @@
 package com.ur4n0.castellari.ui.view
 
 import android.content.Context
+import android.content.Intent
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -10,6 +16,8 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,16 +25,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ur4n0.castellari.R
 import com.ur4n0.castellari.ui.components.ClientInputItem
 import com.ur4n0.castellari.ui.theme.CastellariTheme
 import com.ur4n0.castellari.util.getPathToSave
 import com.ur4n0.castellari.util.getTodayDate
+import com.ur4n0.castellari.util.selectDirectory
 import com.ur4n0.castellari.viewmodel.MainViewModel
 
 @Composable
 fun RenderContents() {
+    ConfigDialog()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -53,7 +64,7 @@ fun RenderContents() {
 }
 
 @Composable
-fun RenderTable(){
+fun RenderTable() {
     TableHeader()
     TableContent()
 }
@@ -81,14 +92,14 @@ fun ClientInputs(mainViewModel: MainViewModel = viewModel()) {
             ClientInputItem(
                 labelText = "Cliente",
                 placeholder = "Nome do cliente",
-                modifier =  defaultModifier,
+                modifier = defaultModifier,
                 value = mainViewModel.clientName,
                 onValueChange = { mainViewModel.onNameChange(it) }
             )
             ClientInputItem(
                 labelText = "Veiculo",
                 placeholder = "Tipo do veiculo",
-                modifier =  defaultModifier,
+                modifier = defaultModifier,
                 value = mainViewModel.clientVehicle,
                 onValueChange = { mainViewModel.onVehicleChange(it) }
             )
@@ -106,14 +117,14 @@ fun ClientInputs(mainViewModel: MainViewModel = viewModel()) {
             ClientInputItem(
                 labelText = "Telefone",
                 placeholder = "Telefone do cliente",
-                modifier =  defaultModifier,
+                modifier = defaultModifier,
                 value = mainViewModel.clientTelephone,
                 onValueChange = { mainViewModel.onTelephoneChange(it) }
             )
             ClientInputItem(
                 labelText = "Placa",
                 placeholder = "Placa do veiculo",
-                modifier =  defaultModifier,
+                modifier = defaultModifier,
                 value = mainViewModel.clientLicensePlate,
                 onValueChange = { mainViewModel.onLicensePlateChange(it) }
             )
@@ -197,7 +208,7 @@ fun FooterButtons(mainViewModel: MainViewModel = viewModel()) {
 }
 
 @Composable
-fun LogoLayout(context: Context) {
+fun LogoLayout(context: Context, mainViewModel: MainViewModel = viewModel()) {
     Box(
         Modifier
             .fillMaxWidth(),
@@ -217,9 +228,7 @@ fun LogoLayout(context: Context) {
                         Toast.LENGTH_SHORT
                     )
                     .show()
-                if (!getPathToSave(context).equals("")) {
-
-                }
+                mainViewModel.configDialogStatus = true
             },
             modifier = Modifier
                 .padding(0.dp, 0.dp)
@@ -240,6 +249,35 @@ fun LogoLayout(context: Context) {
             )
         }
 
+    }
+}
+
+@Composable
+fun ConfigDialog(mainViewModel: MainViewModel = viewModel()) {
+    val context: Context = LocalContext.current
+    val launcherResult = remember { mutableStateOf("") }
+    val launcher: ManagedActivityResultLauncher<Intent, ActivityResult> =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            launcherResult.value = ActivityResult.CREATOR.toString()
+        }
+
+    if (mainViewModel.configDialogStatus) {
+        AlertDialog(
+            onDismissRequest = { mainViewModel.configDialogStatus = false },
+            title = { Text("Deseja alterar o local onde salvar os PDFs?") },
+            text = { Text("local atual: " + getPathToSave(context)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        Toast
+                            .makeText(context, "confirmado", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                ) {
+                    Text("Alterar")
+                }
+            }
+        )
     }
 }
 
