@@ -176,7 +176,17 @@ fun FooterButtons(
             onClick = {
                 if (getPathToSave(context) == "") {
                     activityLauncher.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
-                } 
+                } else if (mainViewModel.isMissingFields()) {
+                    Toast
+                        .makeText(
+                            context,
+                            "Por favor, preencha os campos primeiro...",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
+                } else {
+                    createPdf(context, mainViewModel)
+                }
             },
             colors = ButtonDefaults
                 .buttonColors(
