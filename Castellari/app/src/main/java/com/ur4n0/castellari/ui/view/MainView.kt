@@ -1,5 +1,7 @@
 package com.ur4n0.castellari.ui.view
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -7,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -27,17 +30,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ur4n0.castellari.MainActivity
 import com.ur4n0.castellari.R
 import com.ur4n0.castellari.ui.components.ClientInputItem
 import com.ur4n0.castellari.ui.theme.CastellariTheme
-import com.ur4n0.castellari.util.getPathToSave
-import com.ur4n0.castellari.util.getTodayDate
-import com.ur4n0.castellari.util.selectDirectory
+import com.ur4n0.castellari.util.*
 import com.ur4n0.castellari.viewmodel.MainViewModel
 
 @Composable
-fun RenderContents() {
-    ConfigDialog()
+fun RenderContents(activityLauncher: ActivityResultLauncher<Intent>) {
+    ConfigDialog(activityLauncher)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -58,7 +60,7 @@ fun RenderContents() {
                 .fillMaxWidth()
                 .weight(3f)
         ) {
-            FooterButtons()
+            FooterButtons(activityLauncher)
         }
     }
 }
@@ -133,7 +135,12 @@ fun ClientInputs(mainViewModel: MainViewModel = viewModel()) {
 }
 
 @Composable
-fun FooterButtons(mainViewModel: MainViewModel = viewModel()) {
+fun FooterButtons(
+    activityLauncher: ActivityResultLauncher<Intent>,
+    mainViewModel: MainViewModel = viewModel()
+) {
+    val context = LocalContext.current
+
     Row(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End
@@ -167,6 +174,9 @@ fun FooterButtons(mainViewModel: MainViewModel = viewModel()) {
     ) {
         Button(
             onClick = {
+                if (getPathToSave(context) == "") {
+                    activityLauncher.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
+                } 
             },
             colors = ButtonDefaults
                 .buttonColors(
@@ -252,14 +262,13 @@ fun LogoLayout(context: Context, mainViewModel: MainViewModel = viewModel()) {
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
-fun ConfigDialog(mainViewModel: MainViewModel = viewModel()) {
+fun ConfigDialog(
+    activityLauncher: ActivityResultLauncher<Intent>,
+    mainViewModel: MainViewModel = viewModel()
+) {
     val context: Context = LocalContext.current
-    val launcherResult = remember { mutableStateOf("") }
-    val launcher: ManagedActivityResultLauncher<Intent, ActivityResult> =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            launcherResult.value = ActivityResult.CREATOR.toString()
-        }
 
     if (mainViewModel.configDialogStatus) {
         AlertDialog(
@@ -272,6 +281,9 @@ fun ConfigDialog(mainViewModel: MainViewModel = viewModel()) {
                         Toast
                             .makeText(context, "confirmado", Toast.LENGTH_SHORT)
                             .show()
+
+                        activityLauncher.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
+                        mainViewModel.configDialogStatus = false
                     }
                 ) {
                     Text("Alterar")
@@ -281,10 +293,10 @@ fun ConfigDialog(mainViewModel: MainViewModel = viewModel()) {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun DefaultPreview() {
-    CastellariTheme {
-        RenderContents()
-    }
-}
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun DefaultPreview() {
+//    CastellariTheme {
+//        RenderContents()
+//    }
+//}
