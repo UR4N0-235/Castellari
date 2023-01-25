@@ -49,11 +49,19 @@ class MainViewModel : ViewModel() {
         Log.d("product.size: ", "size changed to " + _listOfElements.size)
     }
 
-    fun newId(): Int {
+    private fun newId(): Int {
         if (_listOfElements.isEmpty()) {
             return 1
         }
         return _listOfElements.last().id + 1
+    }
+
+    fun calcTotalPriceForAllProducts(): Double{
+        var result: Double = 0.0
+        _listOfElements.forEach {
+            result =+ it.unitPrice * it.quantity
+        }
+        return result
     }
 
     fun isMissingFields(): Boolean {
