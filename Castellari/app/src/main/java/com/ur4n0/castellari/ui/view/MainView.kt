@@ -1,39 +1,30 @@
 package com.ur4n0.castellari.ui.view
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ur4n0.castellari.MainActivity
 import com.ur4n0.castellari.R
 import com.ur4n0.castellari.ui.components.ClientInputItem
-import com.ur4n0.castellari.ui.theme.CastellariTheme
 import com.ur4n0.castellari.util.*
 import com.ur4n0.castellari.viewmodel.MainViewModel
 
@@ -121,7 +112,8 @@ fun ClientInputs(mainViewModel: MainViewModel = viewModel()) {
                 placeholder = "Telefone do cliente",
                 modifier = defaultModifier,
                 value = mainViewModel.clientTelephone,
-                onValueChange = { mainViewModel.onTelephoneChange(it) }
+                onValueChange = { mainViewModel.onTelephoneChange(it) },
+                keyboardType = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
             ClientInputItem(
                 labelText = "Placa",
@@ -142,30 +134,50 @@ fun FooterButtons(
     val context = LocalContext.current
 
     Row(
-        Modifier.fillMaxWidth(),
+        Modifier
+            .fillMaxWidth()
+            .background(Color.Transparent),
         horizontalArrangement = Arrangement.End
     ) {
-        Button(
-            onClick = {
-                mainViewModel.addEmptyProduct()
-            },
-            colors = ButtonDefaults
-                .buttonColors(
-                    backgroundColor = Color.Transparent
-                ),
-            modifier = Modifier
-                .padding(0.dp, 0.dp)
-                .size(40.dp),
-            contentPadding = PaddingValues(0.dp, 0.dp),
-        ) {
-            Icon(
-                Icons.Rounded.Add,
-                contentDescription = "Adicionar",
-                modifier = Modifier
-                    .size(40.dp)
-                    .border(BorderStroke(1.dp, Color.Black))
-                    .background(MaterialTheme.colors.primary)
+        Row(Modifier.background(Color.Black)) {
+            Text("Total: " + mainViewModel.calcTotalPriceForAllProducts())
+        }
+
+        Row(Modifier.background(Color.Black)) {
+            Text("Numero de parcelas: ")
+            BasicTextField(
+                value = mainViewModel.monthsToPay,
+                onValueChange = {
+                    mainViewModel.monthsToPay = it
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
+        }
+
+
+        Column {
+            Button(
+                onClick = {
+                    mainViewModel.addEmptyProduct()
+                },
+                colors = ButtonDefaults
+                    .buttonColors(
+                        backgroundColor = Color.Transparent
+                    ),
+                modifier = Modifier
+                    .padding(0.dp, 0.dp)
+                    .size(40.dp),
+                contentPadding = PaddingValues(0.dp, 0.dp),
+            ) {
+                Icon(
+                    Icons.Rounded.Add,
+                    contentDescription = "Adicionar",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .border(BorderStroke(1.dp, Color.Black))
+                        .background(MaterialTheme.colors.primary)
+                )
+            }
         }
     }
     Row(
@@ -288,12 +300,14 @@ fun ConfigDialog(
             confirmButton = {
                 TextButton(
                     onClick = {
+
                         Toast
                             .makeText(context, "confirmado", Toast.LENGTH_SHORT)
                             .show()
 
                         activityLauncher.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
                         mainViewModel.configDialogStatus = false
+
                     }
                 ) {
                     Text("Alterar")

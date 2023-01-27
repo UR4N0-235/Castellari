@@ -1,9 +1,6 @@
 package com.ur4n0.castellari.util
 
-import android.Manifest
-import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -11,18 +8,12 @@ import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.graphics.pdf.PdfDocument.Page
 import android.graphics.pdf.PdfDocument.PageInfo
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
-import androidx.compose.ui.graphics.Color
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.ur4n0.castellari.R
 import com.ur4n0.castellari.viewmodel.MainViewModel
 import java.io.File
 import java.io.FileOutputStream
 
-@RequiresApi(Build.VERSION_CODES.KITKAT)
 fun createPdf(context: Context, mainViewModel: MainViewModel) {
     val margin = 88.58f
     val logoWidth = 600f
@@ -32,19 +23,19 @@ fun createPdf(context: Context, mainViewModel: MainViewModel) {
     val pageInfo = PageInfo.Builder(1240, 1754, 1).create()
     val page: Page = document.startPage(pageInfo)
 
-    var canvas: Canvas = page.canvas
+    val canvas: Canvas = page.canvas
     val logoPaint = Paint()
 
-    val clienteDataText = Paint()
-    clienteDataText.textAlign = Paint.Align.LEFT
-    clienteDataText.textSize = 44f
-    clienteDataText.color = 0xFFFFFFFF.toInt()
+    val clientDataPainter = Paint()
+    clientDataPainter.textAlign = Paint.Align.LEFT
+    clientDataPainter.textSize = 44f
+    clientDataPainter.color = 0xFFFFFFFF.toInt()
 
-    val blackRect = Paint()
-    blackRect.color = 0xFF000000.toInt()
+    val blackRectPainter = Paint()
+    blackRectPainter.color = 0xFF000000.toInt()
 
-    var logoBitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.pdflogo)
-    var scaledLogoBitmap: Bitmap = Bitmap.createScaledBitmap(
+    val logoBitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.pdflogo)
+    val scaledLogoBitmap: Bitmap = Bitmap.createScaledBitmap(
         logoBitmap,
         logoWidth.toInt(), logoHeight.toInt(), false
     )
@@ -55,7 +46,7 @@ fun createPdf(context: Context, mainViewModel: MainViewModel) {
         margin,
         pageInfo.pageWidth - margin,
         logoHeight + margin,
-        blackRect
+        blackRectPainter
     )
 
     val clientFieldsLeftSpacing = margin + logoWidth + 50
@@ -63,14 +54,14 @@ fun createPdf(context: Context, mainViewModel: MainViewModel) {
         "Cliente: " + mainViewModel.clientName,
         clientFieldsLeftSpacing,
         margin + 75,
-        clienteDataText
+        clientDataPainter
     )
 
     canvas.drawText(
         "Telefone: " + mainViewModel.clientTelephone,
         clientFieldsLeftSpacing,
         margin + 150,
-        clienteDataText
+        clientDataPainter
     )
 
 
@@ -78,32 +69,32 @@ fun createPdf(context: Context, mainViewModel: MainViewModel) {
         "Veiculo: " + mainViewModel.clientVehicle,
         clientFieldsLeftSpacing,
         margin + 225,
-        clienteDataText
+        clientDataPainter
     )
 
     canvas.drawText(
         "Placa: " + mainViewModel.clientLicensePlate,
         clientFieldsLeftSpacing,
         margin + 300,
-        clienteDataText
+        clientDataPainter
     )
 
     canvas.drawText(
         "Valor total: " + mainViewModel.calcTotalPriceForAllProducts().toString(),
         clientFieldsLeftSpacing,
         margin + 375,
-        clienteDataText
+        clientDataPainter
     )
 
-    val orcamentoText = Paint()
-    orcamentoText.textAlign = Paint.Align.CENTER
-    orcamentoText.textSize = 64f
+    val tableTitlePainter = Paint()
+    tableTitlePainter.textAlign = Paint.Align.CENTER
+    tableTitlePainter.textSize = 64f
 
     canvas.drawText(
         "Orçamento",
         pageInfo.pageWidth / 2f,
         margin + 480f,
-        orcamentoText
+        tableTitlePainter
     )
 
     canvas.drawRect(
@@ -111,42 +102,76 @@ fun createPdf(context: Context, mainViewModel: MainViewModel) {
         margin + 528f,
         pageInfo.pageWidth - margin,
         margin + 528f + 64f,
-        blackRect
+        blackRectPainter
     )
 
-    val tableHeaderText = Paint()
-    tableHeaderText.color = 0xFFFFFFFF.toInt()
-    tableHeaderText.textAlign = Paint.Align.CENTER
-    tableHeaderText.textSize = 32f
+    val tableHeaderPainter = Paint()
+    tableHeaderPainter.color = 0xFFFFFFFF.toInt()
+    tableHeaderPainter.textAlign = Paint.Align.CENTER
+    tableHeaderPainter.textSize = 32f
 
     val contentWidth = pageInfo.pageWidth - (margin * 2)
     canvas.drawText(
         "Descricao",
-        contentWidth / 4f + margin - (tableHeaderText.textSize / 2),
+        contentWidth / 4f + margin - (tableHeaderPainter.textSize / 2),
         margin + 528f + 48f,
-        tableHeaderText
+        tableHeaderPainter
     )
 
     canvas.drawText(
         "Preco",
-        contentWidth * 0.6f + margin - (tableHeaderText.textSize / 2),
+        contentWidth * 0.6f + margin - (tableHeaderPainter.textSize / 2),
         margin + 528f + 48f,
-        tableHeaderText
+        tableHeaderPainter
     )
 
     canvas.drawText(
         "Qtd",
-        contentWidth * 0.75f + margin - (tableHeaderText.textSize / 2),
+        contentWidth * 0.75f + margin - (tableHeaderPainter.textSize / 2),
         margin + 528f + 48f,
-        tableHeaderText
+        tableHeaderPainter
     )
 
     canvas.drawText(
         "Total",
-        contentWidth * 0.90f + margin - (tableHeaderText.textSize / 2),
+        contentWidth * 0.90f + margin - (tableHeaderPainter.textSize / 2),
         margin + 528f + 48f,
-        tableHeaderText
+        tableHeaderPainter
     )
+
+    val productDataPainter = Paint()
+    productDataPainter.textSize = 32f
+    productDataPainter.textAlign = Paint.Align.LEFT
+
+    mainViewModel.listOfElements.forEachIndexed { index, product ->
+        canvas.drawText(
+            product.description,
+            contentWidth / 4f + margin - (productDataPainter.textSize / 2),
+            margin + 606f + (index + 1) * 75f,
+            productDataPainter
+        )
+
+        canvas.drawText(
+            product.unitPrice.toString(),
+            contentWidth * 0.6f + margin - (productDataPainter.textSize / 2),
+            margin + 606f + (index + 1) * 75f,
+            productDataPainter
+        )
+
+        canvas.drawText(
+            product.quantity.toString(),
+            contentWidth * 0.75f + margin - (productDataPainter.textSize / 2),
+            margin + 606f + (index + 1) * 75f,
+            productDataPainter
+        )
+
+        canvas.drawText(
+            (product.unitPrice * product.quantity).toString(),
+            contentWidth * 0.90f + margin - (productDataPainter.textSize / 2),
+            margin + 606f + (index + 1) * 75f,
+            productDataPainter
+        )
+    }
 
     document.finishPage(page)
     val fileName =

@@ -1,11 +1,9 @@
 package com.ur4n0.castellari.ui.view
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.*
-import com.ur4n0.castellari.model.Product
-
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,11 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ur4n0.castellari.model.Product
 import com.ur4n0.castellari.viewmodel.MainViewModel
 
 @Composable
@@ -78,36 +78,39 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                 .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val text = mutableStateOf(product.quantity.toString())
             TextField(
-                value = text.value,
+                value = product.quantity.toString(),
+                onValueChange = {
+//                    try {
+//                        if (it == "0" || it == "") {
+//                            product.quantity = 0
+//                            text.value = ""
+//                        } else if (it.length > 1) {
+//                            product.quantity = it.drop(1).toInt()
+//                            text.value = it.drop(1)
+//                        } else {
+//                            product.quantity = it.toInt()
+//                            text.value = it
+//                        }
+//                    } catch (ex: NumberFormatException) {
+//                        println("quantity NaN Exception")
+//                        text.value = product.quantity.toString()
+//                    }
+                    if(it.length <= 2) product.quantity = it.toInt()
+                },
                 singleLine = true,
                 modifier = Modifier
                     .focusRequester(FocusRequester())
-                    .fillMaxHeight().padding(0.dp),
-                onValueChange = {
-                    try {
-                        if (it == "0" || it == "") {
-                            product.quantity = 0
-                            text.value = ""
-                        } else if (it.length > 1) {
-                            product.quantity = it.drop(1).toInt()
-                            text.value = it.drop(1)
-                        } else {
-                            product.quantity = it.toInt()
-                            text.value = it
-                        }
-                    } catch (ex: NumberFormatException) {
-                        println("quantity NaN Exception")
-                        text.value = product.quantity.toString()
-                    }
-                },
+                    .fillMaxHeight()
+                    .padding(0.dp),
+
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
                 ),
                 textStyle = LocalTextStyle.current.copy(
                     fontSize = fontSize
                 ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
         Column(
@@ -121,7 +124,8 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                 value = text.value,
                 modifier = Modifier
                     .focusRequester(FocusRequester())
-                    .fillMaxHeight().padding(0.dp),
+                    .fillMaxHeight()
+                    .padding(0.dp),
                 textStyle = LocalTextStyle.current.copy(
                     fontSize = fontSize
                 ),
@@ -139,13 +143,14 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                 .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row{
+            Row {
                 val text = mutableStateOf(product.unitPrice.toString())
                 TextField(
                     value = text.value,
                     modifier = Modifier
                         .focusRequester(FocusRequester())
-                        .fillMaxHeight().padding(10.dp),
+                        .fillMaxHeight()
+                        .padding(10.dp),
 
                     onValueChange = {
                         try {
@@ -160,7 +165,8 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                             println("unitPrice NaN Exception")
                             text.value = product.unitPrice.toString()
                         }
-                    }, colors = TextFieldDefaults.textFieldColors(
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = Color.Transparent
                     ),
                     textStyle = LocalTextStyle.current.copy(
@@ -178,13 +184,16 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
             Row {
                 Text(
                     "R$ " + (product.quantity * product.unitPrice).toString(),
-                    Modifier.fillMaxHeight().padding(0.dp),
+                    Modifier
+                        .fillMaxHeight()
+                        .padding(0.dp),
                     fontSize = fontSize
                 )
                 Button(
                     onClick = {
                         mainViewModel.removeProduct(product)
-                    }, colors = ButtonDefaults.buttonColors(
+                    },
+                    colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.Transparent,
                         contentColor = MaterialTheme.colors.primary
                     ),
