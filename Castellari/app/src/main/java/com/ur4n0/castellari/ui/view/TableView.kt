@@ -171,14 +171,14 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
                 value = text.value,
                 onValueChange = {
                     if (it.length <= 7 && thisCanBeDouble(it)) {
-                        try {
-                            if (it == "0" || it == "") {
-                                product.unitPrice = 0.0
-                                text.value = ""
-                            } else {
+                        Log.v("TableView.ProductRow", "now unitPrice of product ${product.id} is $it")
                         text.value = it
                         product.unitPrice = it.toDouble()
                     } else if (it.isEmpty()) {
+                        Log.v(
+                            "TableView.ProductRow",
+                            "now unitPrice of product ${product.id} is empty"
+                        )
                         text.value = it
                         product.unitPrice = 0.0
                     }

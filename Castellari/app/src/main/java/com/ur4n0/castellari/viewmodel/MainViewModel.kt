@@ -28,41 +28,47 @@ class MainViewModel : ViewModel() {
 
     fun onNameChange(newString: String) {
         clientName = newString
+        Log.v("MainViewModel.onNameChange: ", "client name changed to $newString")
     }
 
     fun onTelephoneChange(newString: String) {
         clientTelephone = newString
+        Log.v("MainViewModel.onTelephoneChange: ", "client telephone changed to $newString")
     }
 
     fun onVehicleChange(newString: String) {
         clientVehicle = newString
+        Log.v("MainViewModel.onVehicleChange: ", "client vehicle changed to $newString")
     }
 
     fun onLicensePlateChange(newString: String) {
         clientLicensePlate = newString
+        Log.v("MainViewModel.onLicensePlateChange: ", "client licensePlate changed to $newString")
     }
 
     fun addEmptyProduct() {
         val latestId: Int = newId()
         _listOfElements.add(Product(latestId, 1, "", 0.0))
-        Log.d("product.status: ", "added new product")
-        Log.d("product.size: ", "size changed to " + _listOfElements.size)
+        Log.v("product.addEmptyProduct: ", "added new product")
+        Log.v("product.addEmptyProduct: ", "size changed to " + _listOfElements.size)
     }
 
     fun removeProduct(product: Product) {
         _listOfElements.removeAll { it == product }
-        Log.d("product.status: ", "removed product")
-        Log.d("product.removed.info: ", product.id.toString())
-        Log.d("product.removed.info: ", product.quantity.toString())
-        Log.d("product.removed.info: ", product.description)
-        Log.d("product.removed.info: ", product.unitPrice.toString())
-        Log.d("product.size: ", "size changed to " + _listOfElements.size)
+        Log.v("product.removeProduct: ", "removed product")
+        Log.v("product.removeProduct: ", product.id.toString())
+        Log.v("product.removeProduct: ", product.quantity.toString())
+        Log.v("product.removeProduct: ", product.description)
+        Log.v("product.removeProduct: ", product.unitPrice.toString())
+        Log.v("product.removeProduct: ", "size changed to " + _listOfElements.size)
     }
 
     private fun newId(): Int {
         if (_listOfElements.isEmpty()) {
+            Log.v("MainViewModel.newId", "not id yet, id 1 generated")
             return 1
         }
+        Log.v("MainViewModel.newId", "id ${_listOfElements.last().id + 1} generated")
         return _listOfElements.last().id + 1
     }
 
@@ -72,6 +78,8 @@ class MainViewModel : ViewModel() {
             result += it.unitPrice * it.quantity
         }
         result += result * ( porcentagePerMonth.toDouble() / 100)
+        Log.v("MainViewModel.calcTotalPriceForAllProducts", "list size ${_listOfElements.size}")
+        Log.v("MainViewModel.calcTotalPriceForAllProducts", "totalPriceForAllProducts is $result")
         return result
     }
 
