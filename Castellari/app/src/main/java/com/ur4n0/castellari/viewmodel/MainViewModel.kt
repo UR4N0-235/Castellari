@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.ur4n0.castellari.model.Product
+import com.ur4n0.castellari.util.thisCanBeDouble
 
 class MainViewModel : ViewModel() {
     var clientName by mutableStateOf("")
@@ -16,10 +17,14 @@ class MainViewModel : ViewModel() {
 
     var configDialogStatus by mutableStateOf(false)
 
-    var monthsToPay by mutableStateOf("1")
-
     private val _listOfElements: MutableList<Product> = mutableStateListOf()
     val listOfElements = _listOfElements
+
+    var monthsToPay by mutableStateOf("1")
+    var porcentagePerMonth by mutableStateOf("0.0")
+
+    var totalPriceOfAllProducts by mutableStateOf(calcTotalPriceForAllProducts())
+    var totalPriceSplitIntoPaymentsMonths by mutableStateOf(calcPriceToPayPerMonth())
 
     fun onNameChange(newString: String) {
         clientName = newString
@@ -61,11 +66,12 @@ class MainViewModel : ViewModel() {
         return _listOfElements.last().id + 1
     }
 
-    fun calcTotalPriceForAllProducts(): Double{
-        var result: Double = 0.0
-        _listOfElements.forEach {
-            result =+ it.unitPrice * it.quantity
+    fun calcTotalPriceForAllProducts(): Double {
+        var result = 0.0
+        if (_listOfElements.size > 0) listOfElements.forEach {
+            result += it.unitPrice * it.quantity
         }
+        result += result * ( porcentagePerMonth.toDouble() / 100)
         return result
     }
 
@@ -75,5 +81,19 @@ class MainViewModel : ViewModel() {
                 clientLicensePlate == "" ||
                 clientVehicle == "" ||
                 listOfElements.size == 0)
+    }
+
+    private fun calcPriceToPayPerMonth(): Double {
+        val realPercentage = (porcentagePerMonth.toDouble() / 100) + 1
+        val totalPaymentWithPercentage = totalPriceOfAllProducts * realPercentage
+
+        return if (thisCanBeDouble(monthsToPay)) {
+            (totalPaymentWithPercentage / monthsToPay.toDouble())
+        } else 0.0
+    }
+
+    fun updateTotalPriceValues() {
+        totalPriceOfAllProducts = calcTotalPriceForAllProducts()
+        totalPriceSplitIntoPaymentsMonths = calcPriceToPayPerMonth()
     }
 }

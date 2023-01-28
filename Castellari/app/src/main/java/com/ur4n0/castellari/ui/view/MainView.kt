@@ -3,6 +3,7 @@ package com.ur4n0.castellari.ui.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.*
@@ -14,14 +15,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ur4n0.castellari.R
 import com.ur4n0.castellari.ui.components.ClientInputItem
@@ -126,6 +132,7 @@ fun ClientInputs(mainViewModel: MainViewModel = viewModel()) {
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun FooterButtons(
     activityLauncher: ActivityResultLauncher<Intent>,
@@ -133,36 +140,171 @@ fun FooterButtons(
 ) {
     val context = LocalContext.current
 
-    Row(
+    Column( // all footer column
         Modifier
             .fillMaxWidth()
-            .background(Color.Transparent),
-        horizontalArrangement = Arrangement.End
+            .fillMaxHeight()
     ) {
-        Row(Modifier.background(Color.Black)) {
-            Text("Total: " + mainViewModel.calcTotalPriceForAllProducts())
+        Row( // first row
+            Modifier
+                .fillMaxWidth()
+                .weight(60f)
+                .background(Color.Transparent),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Column(Modifier.weight(80f)) { // column of datas about total price
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .background(Color.Transparent)
+                ) {
+                    Row(Modifier.weight(50f)) {
+                        Text("Parcelado em : ")
+                        // declaring this, because if client type nothing, the ui needs to render empty field
+                        var textMonthsToPay by mutableStateOf(mainViewModel.monthsToPay)
+                        if (textMonthsToPay == "0") textMonthsToPay = ""
+
+                        BasicTextField(
+                            value = textMonthsToPay,
+                            onValueChange = {
+                                if (thisCanBeInteger(it)) { // if it can be int, then verify if is less than 12 months
+                                    if (it.toInt() <= 12) mainViewModel.monthsToPay = it
+                                }
+                                if (it.isEmpty()) {
+                                    textMonthsToPay = ""
+                                    mainViewModel.monthsToPay = "0"
+                                }
+                                mainViewModel.updateTotalPriceValues()
+                            },
+                            textStyle = LocalTextStyle.current.copy(
+                                color = Color.White,
+                                textAlign = TextAlign.Left
+                            ),
+                            modifier = Modifier.width(IntrinsicSize.Min),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                        Text(text = " x")
+                    }
+                    Row(Modifier.weight(50f)) {
+                        Text("com juros de ")
+                        // declaring this, because if client type nothing, the ui needs to render empty field
+                        var textPercentagePerMonth by mutableStateOf(mainViewModel.porcentagePerMonth)
+                        if (textPercentagePerMonth == "0") textPercentagePerMonth = ""
+
+                        BasicTextField(
+                            value = textPercentagePerMonth,
+                            modifier = Modifier
+                                .width(IntrinsicSize.Min)
+                                .focusRequester(FocusRequester())
+                                .onFocusChanged {
+                                    textPercentagePerMonth =
+                                        if (textPercentagePerMonth == "") "0.0" else textPercentagePerMonth
+                                },
+                            onValueChange = {
+                                if (thisCanBeDouble(it)) { // if it can be int, then verify if is less than 12 months
+                                    if (it.toDouble() > 0 && it.toDouble() < 100) mainViewModel.porcentagePerMonth =
+                                        it
+                                }
+                                if (it.isEmpty() || it == "0.0" || it == ".0" || it == "0") {
+                                    textPercentagePerMonth = ""
+                                    mainViewModel.porcentagePerMonth = "0"
+                                }
+                                mainViewModel.updateTotalPriceValues()
+                            },
+                            textStyle = LocalTextStyle.current.copy(
+                                color = Color.White,
+                                textAlign = TextAlign.Left
+                            ),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                        Text(text = "%")
+                    }
+                }
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .background(Color.Transparent),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "Total: R$ ${convertToMonetaryCase(mainViewModel.totalPriceOfAllProducts)}",
+                        fontSize = 3.5.em
+                    )
+                    Text(
+                        "Valor por parcela: R$ ${convertToMonetaryCase(mainViewModel.totalPriceSplitIntoPaymentsMonths)}",
+                        fontSize = 3.5.em
+                    )
+                }
+            }
+            Column(Modifier.weight(20f)) {
+                Button(
+                    onClick = {
+                        mainViewModel.addEmptyProduct()
+                    },
+                    colors = ButtonDefaults
+                        .buttonColors(
+                            backgroundColor = Color.Transparent
+                        ),
+                    modifier = Modifier
+                        .padding(0.dp, 0.dp)
+                        .size(60.dp),
+                    contentPadding = PaddingValues(0.dp, 0.dp),
+                ) {
+                    Icon(
+                        Icons.Rounded.Add,
+                        contentDescription = "Adicionar",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .border(BorderStroke(1.dp, Color.Black))
+                            .background(MaterialTheme.colors.primary)
+                    )
+                }
+            }
         }
-
-        Row(Modifier.background(Color.Black)) {
-            Text("Numero de parcelas: ")
-            BasicTextField(
-                value = mainViewModel.monthsToPay,
-                onValueChange = {
-                    mainViewModel.monthsToPay = it
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-        }
-
-
-        Column {
+        Row(
+            Modifier
+                .weight(40f)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
             Button(
                 onClick = {
-                    mainViewModel.addEmptyProduct()
+                    if (getPathToSave(context) == "") {
+                    activityLauncher.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
+                    } else if (mainViewModel.isMissingFields()) {
+                        Toast
+                            .makeText(
+                                context,
+                                "Por favor, preencha os campos primeiro...",
+                                Toast.LENGTH_SHORT
+                            )
+                            .show()
+                    } else {
+                        createPdf(context, mainViewModel)
+                    }
                 },
                 colors = ButtonDefaults
                     .buttonColors(
-                        backgroundColor = Color.Transparent
+                        backgroundColor = MaterialTheme
+                            .colors
+                            .primaryVariant,
+                        contentColor = MaterialTheme
+                            .colors
+                            .primary
+                    ),
+
+                ) {
+                Text("Salvar")
+            }
+
+            Button(
+                onClick = {
+
+                },
+                colors = ButtonDefaults
+                    .buttonColors(
+                        backgroundColor = Color.Transparent,
                     ),
                 modifier = Modifier
                     .padding(0.dp, 0.dp)
@@ -170,71 +312,14 @@ fun FooterButtons(
                 contentPadding = PaddingValues(0.dp, 0.dp),
             ) {
                 Icon(
-                    Icons.Rounded.Add,
-                    contentDescription = "Adicionar",
+                    Icons.Rounded.Share,
+                    contentDescription = "Compartilhar",
                     modifier = Modifier
                         .size(40.dp)
                         .border(BorderStroke(1.dp, Color.Black))
-                        .background(MaterialTheme.colors.primary)
+                        .background(MaterialTheme.colors.primaryVariant)
                 )
             }
-        }
-    }
-    Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        Button(
-            onClick = {
-                if (getPathToSave(context) == "") {
-                    activityLauncher.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
-                } else if (mainViewModel.isMissingFields()) {
-                    Toast
-                        .makeText(
-                            context,
-                            "Por favor, preencha os campos primeiro...",
-                            Toast.LENGTH_SHORT
-                        )
-                        .show()
-                } else {
-                    createPdf(context, mainViewModel)
-                }
-            },
-            colors = ButtonDefaults
-                .buttonColors(
-                    backgroundColor = MaterialTheme
-                        .colors
-                        .primaryVariant,
-                    contentColor = MaterialTheme
-                        .colors
-                        .primary
-                ),
-
-            ) {
-            Text("Salvar")
-        }
-
-        Button(
-            onClick = {
-
-            },
-            colors = ButtonDefaults
-                .buttonColors(
-                    backgroundColor = Color.Transparent,
-                ),
-            modifier = Modifier
-                .padding(0.dp, 0.dp)
-                .size(40.dp),
-            contentPadding = PaddingValues(0.dp, 0.dp),
-        ) {
-            Icon(
-                Icons.Rounded.Share,
-                contentDescription = "Compartilhar",
-                modifier = Modifier
-                    .size(40.dp)
-                    .border(BorderStroke(1.dp, Color.Black))
-                    .background(MaterialTheme.colors.primaryVariant)
-            )
         }
     }
 }
@@ -307,7 +392,6 @@ fun ConfigDialog(
 
                         activityLauncher.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
                         mainViewModel.configDialogStatus = false
-
                     }
                 ) {
                     Text("Alterar")
