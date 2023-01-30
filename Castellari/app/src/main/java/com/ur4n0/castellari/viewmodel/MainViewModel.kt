@@ -92,11 +92,8 @@ class MainViewModel : ViewModel() {
     }
 
     private fun calcPriceToPayPerMonth(): Double {
-        val realPercentage = (porcentagePerMonth.toDouble() / 100) + 1
-        val totalPaymentWithPercentage = totalPriceOfAllProducts * realPercentage
-
         return if (thisCanBeDouble(monthsToPay)) {
-            (totalPaymentWithPercentage / monthsToPay.toDouble())
+            (totalPriceOfAllProducts / monthsToPay.toDouble())
         } else 0.0
     }
 

@@ -32,6 +32,7 @@ fun ClientInputItem(
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 3.em
             ),
+            singleLine = true,
             modifier = modifier,
             keyboardOptions = keyboardType
         )

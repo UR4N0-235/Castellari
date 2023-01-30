@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.*
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ur4n0.castellari.R
 import com.ur4n0.castellari.ui.components.ClientInputItem
@@ -35,7 +37,10 @@ import com.ur4n0.castellari.util.*
 import com.ur4n0.castellari.viewmodel.MainViewModel
 
 @Composable
-fun RenderContents(activityLauncher: ActivityResultLauncher<Intent>) {
+fun RenderContents(
+    activityLauncher: ActivityResultLauncher<Intent>,
+    activityLauncherShare: ActivityResultLauncher<Intent>
+) {
     ConfigDialog(activityLauncher)
     Column(
         modifier = Modifier
@@ -57,7 +62,7 @@ fun RenderContents(activityLauncher: ActivityResultLauncher<Intent>) {
                 .fillMaxWidth()
                 .weight(3f)
         ) {
-            FooterButtons(activityLauncher)
+            FooterButtons(activityLauncher, activityLauncherShare)
         }
     }
 }
@@ -71,6 +76,7 @@ fun RenderTable() {
 @Composable
 fun ClientInputs(mainViewModel: MainViewModel = viewModel()) {
     val defaultModifier: Modifier = Modifier.fillMaxWidth()
+    val context = LocalContext.current
 
     Row(
         modifier = Modifier
@@ -126,7 +132,18 @@ fun ClientInputs(mainViewModel: MainViewModel = viewModel()) {
                 placeholder = "Placa do veiculo",
                 modifier = defaultModifier,
                 value = mainViewModel.clientLicensePlate,
-                onValueChange = { mainViewModel.onLicensePlateChange(it) }
+                onValueChange = { it ->
+                    if (it.length <= 7) mainViewModel.onLicensePlateChange(it)
+                    if (it.length > 7) {
+                        Toast
+                            .makeText(
+                                context,
+                                "O maximo de caracteres de uma placa e 7...",
+                                Toast.LENGTH_SHORT
+                            )
+                            .show()
+                    }
+                }
             )
         }
     }
@@ -136,6 +153,7 @@ fun ClientInputs(mainViewModel: MainViewModel = viewModel()) {
 @Composable
 fun FooterButtons(
     activityLauncher: ActivityResultLauncher<Intent>,
+    activityLauncherShare: ActivityResultLauncher<Intent>,
     mainViewModel: MainViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -156,7 +174,7 @@ fun FooterButtons(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .height(40.dp)
+//                        .height(30.dp)
                         .background(Color.Transparent)
                 ) {
                     Row(Modifier.weight(50f)) {
@@ -170,6 +188,15 @@ fun FooterButtons(
                             onValueChange = {
                                 if (thisCanBeInteger(it)) { // if it can be int, then verify if is less than 12 months
                                     if (it.toInt() <= 12) mainViewModel.monthsToPay = it
+                                    if (it.toInt() > 12) {
+                                        Toast
+                                            .makeText(
+                                                context,
+                                                "limite maximo de parcelas definido para 12...",
+                                                Toast.LENGTH_SHORT
+                                            )
+                                            .show()
+                                    }
                                 }
                                 if (it.isEmpty()) {
                                     textMonthsToPay = ""
@@ -227,14 +254,20 @@ fun FooterButtons(
                         .background(Color.Transparent),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        "Total: R$ ${convertToMonetaryCase(mainViewModel.totalPriceOfAllProducts)}",
-                        fontSize = 3.5.em
-                    )
-                    Text(
-                        "Valor por parcela: R$ ${convertToMonetaryCase(mainViewModel.totalPriceSplitIntoPaymentsMonths)}",
-                        fontSize = 3.5.em
-                    )
+                    Column {
+                        Row {
+                            Text(
+                                "Total: R$ ${convertToMonetaryCase(mainViewModel.totalPriceOfAllProducts)}",
+                                fontSize = 3.5.em
+                            )
+                        }
+                        Row {
+                            Text(
+                                "Valor por parcela: R$ ${convertToMonetaryCase(mainViewModel.totalPriceSplitIntoPaymentsMonths)}",
+                                fontSize = 3.5.em
+                            )
+                        }
+                    }
                 }
             }
             Column(Modifier.weight(20f)) {
@@ -271,7 +304,10 @@ fun FooterButtons(
             Button(
                 onClick = {
                     if (getPathToSave(context) == "") {
-                    activityLauncher.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
+                        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                        intent.putExtra("process", "savePath")
+                        Log.d("stringTextExtra", intent.getStringExtra("process")!!)
+                        activityLauncher.launch(intent)
                     } else if (mainViewModel.isMissingFields()) {
                         Toast
                             .makeText(
@@ -300,7 +336,30 @@ fun FooterButtons(
 
             Button(
                 onClick = {
+                    if (mainViewModel.isMissingFields()) {
+                        Toast
+                            .makeText(
+                                context,
+                                "Por favor, preencha os campos primeiro...",
+                                Toast.LENGTH_SHORT
+                            )
+                            .show()
+                    } else {
+                        val file = createPdf(context, mainViewModel)
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "com.ur4n0.castellari.fileprovider",
+                            file
+                        )
 
+                        val share = Intent()
+                        share.action = Intent.ACTION_SEND
+                        share.putExtra("process", "share")
+                        share.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file))
+                        share.type = "application/pdf"
+
+                        activityLauncherShare.launch(share)
+                    }
                 },
                 colors = ButtonDefaults
                     .buttonColors(
@@ -390,7 +449,10 @@ fun ConfigDialog(
                             .makeText(context, "confirmado", Toast.LENGTH_SHORT)
                             .show()
 
-                        activityLauncher.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
+                        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                        intent.putExtra("process", "savePath")
+                        Log.d("stringTextExtra", intent.getStringExtra("process")!!)
+                        activityLauncher.launch(intent)
                         mainViewModel.configDialogStatus = false
                     }
                 ) {

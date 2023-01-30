@@ -14,7 +14,10 @@ import com.ur4n0.castellari.viewmodel.MainViewModel
 import java.io.File
 import java.io.FileOutputStream
 
-fun createPdf(context: Context, mainViewModel: MainViewModel) {
+fun createPdf(
+    context: Context,
+    mainViewModel: MainViewModel
+): File {
     val margin = 88.58f
     val logoWidth = 600f
     val logoHeight = 400f
@@ -28,7 +31,7 @@ fun createPdf(context: Context, mainViewModel: MainViewModel) {
 
     val clientDataPainter = Paint()
     clientDataPainter.textAlign = Paint.Align.LEFT
-    clientDataPainter.textSize = 44f
+    clientDataPainter.textSize = 32f
     clientDataPainter.color = 0xFFFFFFFF.toInt()
 
     val blackRectPainter = Paint()
@@ -80,11 +83,21 @@ fun createPdf(context: Context, mainViewModel: MainViewModel) {
     )
 
     canvas.drawText(
-        "Valor total: " + mainViewModel.calcTotalPriceForAllProducts().toString(),
+        "Valor total: " + convertToMonetaryCase(mainViewModel.calcTotalPriceForAllProducts()).toString(),
         clientFieldsLeftSpacing,
         margin + 375,
         clientDataPainter
     )
+
+    clientDataPainter.color = 0xFF000000.toInt()
+
+    canvas.drawText(
+        "Gerado em " + getTodayDate(),
+        clientFieldsLeftSpacing + 50f,
+        margin + 430,
+        clientDataPainter
+    )
+
 
     val tableTitlePainter = Paint()
     tableTitlePainter.textAlign = Paint.Align.CENTER
@@ -139,46 +152,91 @@ fun createPdf(context: Context, mainViewModel: MainViewModel) {
         tableHeaderPainter
     )
 
+    val productDescriptorPainter = Paint()
+    productDescriptorPainter.textSize = 32f
+    productDescriptorPainter.textAlign = Paint.Align.LEFT
+
     val productDataPainter = Paint()
     productDataPainter.textSize = 32f
-    productDataPainter.textAlign = Paint.Align.LEFT
+    productDataPainter.textAlign = Paint.Align.CENTER
 
     mainViewModel.listOfElements.forEachIndexed { index, product ->
         canvas.drawText(
             product.description,
-            contentWidth / 4f + margin - (productDataPainter.textSize / 2),
+            margin + 10,
             margin + 606f + (index + 1) * 75f,
-            productDataPainter
+            productDescriptorPainter
         )
 
         canvas.drawText(
-            product.unitPrice.toString(),
-            contentWidth * 0.6f + margin - (productDataPainter.textSize / 2),
+            "R$ " + convertToMonetaryCase(product.unitPrice * mainViewModel.porcentagePerMonth.toDouble()).toString(),
+            contentWidth * 0.6f + margin - (tableHeaderPainter.textSize / 2),
             margin + 606f + (index + 1) * 75f,
             productDataPainter
         )
 
         canvas.drawText(
             product.quantity.toString(),
-            contentWidth * 0.75f + margin - (productDataPainter.textSize / 2),
+            contentWidth * 0.75f + margin - (tableHeaderPainter.textSize / 2),
             margin + 606f + (index + 1) * 75f,
             productDataPainter
         )
 
         canvas.drawText(
-            (product.unitPrice * product.quantity).toString(),
-            contentWidth * 0.90f + margin - (productDataPainter.textSize / 2),
+            "R$ " + convertToMonetaryCase(product.unitPrice * product.quantity * mainViewModel.porcentagePerMonth.toDouble()).toString(),
+            contentWidth * 0.90f + margin - (tableHeaderPainter.textSize / 2),
             margin + 606f + (index + 1) * 75f,
             productDataPainter
         )
     }
 
+    val totalToPayPainter = Paint()
+    totalToPayPainter.textSize = 32f
+    totalToPayPainter.textAlign = Paint.Align.LEFT
+    totalToPayPainter.color = 0xFFFFFFFF.toInt()
+
+    canvas.drawRect(
+        pageInfo.pageWidth - margin - 400f,
+        pageInfo.pageHeight - margin - 192f,
+        pageInfo.pageWidth - margin,
+        pageInfo.pageHeight - margin - 128f,
+        blackRectPainter
+    )
+
+    canvas.drawRect(
+        pageInfo.pageWidth - margin - 368f,
+        pageInfo.pageHeight - margin - 96f,
+        pageInfo.pageWidth - margin,
+        pageInfo.pageHeight - margin - 32f,
+        blackRectPainter
+    )
+
+    canvas.drawText(
+        mainViewModel.monthsToPay + " parcelas de R$ " + convertToMonetaryCase(mainViewModel.totalPriceSplitIntoPaymentsMonths),
+        pageInfo.pageWidth - margin - 384f - 16f,
+        pageInfo.pageHeight - margin - 128f - 16f,
+        totalToPayPainter
+    )
+
+    canvas.drawText(
+        "Total pago R$ " + convertToMonetaryCase(mainViewModel.totalPriceOfAllProducts),
+        pageInfo.pageWidth - margin - 352f - 16f,
+        pageInfo.pageHeight - margin - 32f - 16f,
+        totalToPayPainter
+    )
+
     document.finishPage(page)
     val fileName =
         mainViewModel.clientName + "_" + mainViewModel.clientLicensePlate + "_" + getTodayDateWithoutSpace()
     val file = File(getPathToSave(context), "$fileName.pdf")
+
+    val fileStatic = context.getExternalFilesDir(null)!!.absolutePath.toString()+"/userspdf"
+//    mainViewModel.
+//    Log.d("filestatic", fileStatic)
+
     try {
         document.writeTo(FileOutputStream(file))
+        document.writeTo(FileOutputStream(fileStatic))
         Toast.makeText(context, "PDF file generated..", Toast.LENGTH_SHORT).show()
     } catch (error: Exception) {
         error.printStackTrace()
@@ -187,4 +245,5 @@ fun createPdf(context: Context, mainViewModel: MainViewModel) {
     } finally {
         document.close()
     }
+    return file
 }

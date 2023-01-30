@@ -137,12 +137,12 @@ fun ProductRow(product: Product, mainViewModel: MainViewModel = viewModel()) {
             BasicTextField(
                 value = text.value,
                 onValueChange = {
-                    if (it.length <= 80) {
+                    if (it.length <= 32) {
                         product.description = it
                         text.value = it
                         Log.v(
                             "TableView.ProductRow",
-                            "now description of product ${product.id} is $it"
+                            "now description of product ${product.id} has ${it.length} length and value is $it"
                         )
                     }
                 },
