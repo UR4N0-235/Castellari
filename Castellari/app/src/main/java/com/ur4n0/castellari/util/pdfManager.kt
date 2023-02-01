@@ -170,7 +170,7 @@ fun createPdf(
         )
 
         canvas.drawText(
-            "R$ " + convertToMonetaryCase(product.unitPrice * mainViewModel.porcentagePerMonth.toDouble()).toString(),
+            "R$ " + convertToMonetaryCase(product.unitPrice * (1 + (mainViewModel.porcentagePerMonth.toDouble() / 100))).toString(),
             contentWidth * 0.6f + margin - (tableHeaderPainter.textSize / 2),
             margin + 606f + (index + 1) * 75f,
             productDataPainter
@@ -184,7 +184,7 @@ fun createPdf(
         )
 
         canvas.drawText(
-            "R$ " + convertToMonetaryCase(product.unitPrice * product.quantity * mainViewModel.porcentagePerMonth.toDouble()).toString(),
+            "R$ " + convertToMonetaryCase(product.unitPrice * product.quantity * ( 1 + (mainViewModel.porcentagePerMonth.toDouble() / 100))).toString(),
             contentWidth * 0.90f + margin - (tableHeaderPainter.textSize / 2),
             margin + 606f + (index + 1) * 75f,
             productDataPainter
@@ -242,10 +242,6 @@ fun createPdf(
 
         file.copyTo(fileOnInternalStorage)
         Log.v("file copyed to internal Storage", fileOnInternalStorage.path)
-
-//        file.copyTo(File(context.filesDir, "teste.pdf"))
-//
-//        document.writeTo(FileOutputStream(fileOnInternalStorage))
 
         Toast.makeText(context, "PDF salvado", Toast.LENGTH_SHORT).show()
     } catch (error: Exception) {
