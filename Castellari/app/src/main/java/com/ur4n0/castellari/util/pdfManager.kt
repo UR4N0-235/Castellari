@@ -234,16 +234,18 @@ fun createPdf(
 
     val file = File(getPathToSave(context), "$fileName.pdf")
 
-    val internalPDFPath = File(context.filesDir, "pdf_to_share")
-    if(!internalPDFPath.exists()) internalPDFPath.mkdir()
-    val fileOnInternalStorage = File(internalPDFPath, "$fileName.pdf")
+    val fileOnInternalStorage = File(context.filesDir, "$fileName.pdf")
 
     try {
         document.writeTo(FileOutputStream(file))
         Log.v("external file saved on", file.path)
 
-        document.writeTo(FileOutputStream(fileOnInternalStorage))
-        Log.v("internal file saved on", fileOnInternalStorage.path)
+        file.copyTo(fileOnInternalStorage)
+        Log.v("file copyed to internal Storage", fileOnInternalStorage.path)
+
+//        file.copyTo(File(context.filesDir, "teste.pdf"))
+//
+//        document.writeTo(FileOutputStream(fileOnInternalStorage))
 
         Toast.makeText(context, "PDF salvado", Toast.LENGTH_SHORT).show()
     } catch (error: Exception) {

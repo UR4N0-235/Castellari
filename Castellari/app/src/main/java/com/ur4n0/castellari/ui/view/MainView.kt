@@ -347,22 +347,23 @@ fun FooterButtons(
                         val file = createPdf(context, mainViewModel)
                         val uri = FileProvider.getUriForFile(
                             context,
-                            "com.ur4n0.castellari.fileprovider",
+                            "com.ur4n0.castellari.provider",
                             file
                         )
                         Log.v("file on uri to share", uri.toString())
 
-                        val share = Intent()
-                        share.action = Intent.ACTION_SEND
+                        val share = Intent(Intent.ACTION_SEND)
                         share.putExtra("process", "share")
                         share.putExtra(Intent.EXTRA_STREAM, uri)
+
                         share.type = "application/pdf"
 
+                        share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         share.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                         share.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
 
-                        activityLauncherShare.launch(share)
+                        context.startActivity(share)
                     }
                 },
                 colors = ButtonDefaults
