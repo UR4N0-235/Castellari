@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.graphics.pdf.PdfDocument.Page
 import android.graphics.pdf.PdfDocument.PageInfo
+import android.util.Log
 import android.widget.Toast
 import com.ur4n0.castellari.R
 import com.ur4n0.castellari.viewmodel.MainViewModel
@@ -228,22 +229,44 @@ fun createPdf(
     document.finishPage(page)
     val fileName =
         mainViewModel.clientName + "_" + mainViewModel.clientLicensePlate + "_" + getTodayDateWithoutSpace()
+
+    removeOldPdfsOnInternalStorage(context)
+
     val file = File(getPathToSave(context), "$fileName.pdf")
 
-    val fileStatic = context.getExternalFilesDir(null)!!.absolutePath.toString()+"/userspdf"
-//    mainViewModel.
-//    Log.d("filestatic", fileStatic)
+    val internalPDFPath = File(context.filesDir, "pdf_to_share")
+    if(!internalPDFPath.exists()) internalPDFPath.mkdir()
+    val fileOnInternalStorage = File(internalPDFPath, "$fileName.pdf")
 
     try {
         document.writeTo(FileOutputStream(file))
-        document.writeTo(FileOutputStream(fileStatic))
-        Toast.makeText(context, "PDF file generated..", Toast.LENGTH_SHORT).show()
+        Log.v("external file saved on", file.path)
+
+        document.writeTo(FileOutputStream(fileOnInternalStorage))
+        Log.v("internal file saved on", fileOnInternalStorage.path)
+
+        Toast.makeText(context, "PDF salvado", Toast.LENGTH_SHORT).show()
     } catch (error: Exception) {
         error.printStackTrace()
-        Toast.makeText(context, "Fail to generate PDF file..", Toast.LENGTH_SHORT)
+        Toast.makeText(context, "Falha ao gerar PDF, tente novamente...", Toast.LENGTH_SHORT)
             .show()
     } finally {
         document.close()
     }
-    return file
+    return fileOnInternalStorage
+}
+
+// to clear data Usage of app
+fun removeOldPdfsOnInternalStorage(context: Context) {
+    val files: Array<String> = context.fileList()
+    files.forEach {
+        val extension: String = it
+        Log.v("file on fileList", it)
+        if (extension.indexOf(".pdf") != -1) {
+            Log.v("file to delete", "${context.filesDir}${File.pathSeparator}$it")
+            if(context.deleteFile(it)) Log.d("deleted", it)
+        } else {
+            Log.v("file without .pdf extension", it)
+        }
+    }
 }

@@ -3,7 +3,6 @@ package com.ur4n0.castellari.ui.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -351,12 +350,17 @@ fun FooterButtons(
                             "com.ur4n0.castellari.fileprovider",
                             file
                         )
+                        Log.v("file on uri to share", uri.toString())
 
                         val share = Intent()
                         share.action = Intent.ACTION_SEND
                         share.putExtra("process", "share")
-                        share.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file))
+                        share.putExtra(Intent.EXTRA_STREAM, uri)
                         share.type = "application/pdf"
+
+                        share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        share.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                        share.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
 
                         activityLauncherShare.launch(share)
                     }
